@@ -51,7 +51,7 @@ function App() {
       console.log(fluidSharedObjects.sharedCursors.get("data"));
       const { sharedCursors } = fluidSharedObjects;
       const updateCursors = () =>
-        setCursors({ data: JSON.parse(sharedCursors.get("data")) });
+        setCursors({ data: JSON.parse(sharedCursors.get('data') ? sharedCursors.get("data") : '[]') });
 
       updateCursors();
       sharedCursors.on("valueChanged", updateCursors);
