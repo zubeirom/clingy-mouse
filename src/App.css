@@ -46,4 +46,18 @@
   left: 0px;
   overflow: auto;
   max-width: 2000px;
+  cursor: none;
+}
+
+div:hover > #hov{
+  display : block;
+
+}
+
+#hov{
+  position:absolute;
+  font-style: italic;
+  font-size:20px;
+  font-weight: bold;
+  color: red;
 }

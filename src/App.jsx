@@ -50,43 +50,42 @@ function App() {
     if (fluidSharedObjects) {
       console.log(fluidSharedObjects.sharedCursors.get("data"));
       const { sharedCursors } = fluidSharedObjects;
-      const updateCursors = () => setCursors({ data: JSON.parse(sharedCursors.get('data'))});
+      const updateCursors = () =>
+        setCursors({ data: JSON.parse(sharedCursors.get("data")) });
 
       updateCursors();
-      sharedCursors.on('valueChanged', updateCursors);
+      sharedCursors.on("valueChanged", updateCursors);
 
       return () => {
-        sharedCursors.off('valueChanged', updateCursors)
-      }
+        sharedCursors.off("valueChanged", updateCursors);
+      };
     } else {
       return;
     }
   }, [fluidSharedObjects]);
 
-  const updateMousePosition = async () => {
-    if (fluidSharedObjects) {
-      const str = fluidSharedObjects.sharedCursors.get("data");
-      if (str == null) {
-        fluidSharedObjects.sharedCursors.set("data", JSON.stringify([generateString(5)]));
-      } else {
-        const data = JSON.parse(str);
-        fluidSharedObjects.sharedCursors.set("data", JSON.stringify([...data, generateString(5)]));
-      }
+  const mouseMove = async (event) => {
+    if(fluidSharedObjects) {
+      fluidSharedObjects.sharedCursors.set('data', JSON.stringify([event.clientY, event.clientX]));
     }
   };
 
-  if(cursors) {
+  if(cursors && cursors.data) {
     return (
-      <div className="main App">
-        <button onClick={updateMousePosition}>Click</button>
-        { cursors.data.map(c => {
+      <><div className="main" onMouseMove={mouseMove}>
+        {/* {cursors.data.map((c) => {
           return <h1>{c}</h1>;
-        })}
+        })} */}
+      <div id="hov" style={{ top: cursors.data[0], left: cursors.data[1]}}>clingy mouse</div> 
       </div>
+      </>
     );
   } else {
-    <button onClick={updateMousePosition}>Click</button>
+    return <div className="main" onMouseMove={mouseMove}>
+      <div id="hov" style={{top: 10, left: 10 }}>clingy mouse</div>
+      </div>
   }
+
 
 }
 
