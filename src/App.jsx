@@ -23,10 +23,17 @@ const getFluidData = async () => {
   return container.initialObjects;
 };
 
-const getFakeName = async () => {
-  const res = await fetch('https://api.namefake.com');
-  const { name } = await res.json;
-  return name;
+function generateString(length) {
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  let result = "";
+  const charactersLength = characters.length;
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+
+  return result;
 }
 
 function App() {
@@ -34,35 +41,53 @@ function App() {
   const [cursors, setCursors] = React.useState();
 
   React.useEffect(() => {
-    getFluidData().then((data) => setFluidSharedObjects(data));
+    getFluidData().then((data) => {
+      setFluidSharedObjects(data);
+    });
   }, []);
 
   React.useEffect(() => {
     if (fluidSharedObjects) {
-      console.log(fluidSharedObjects.sharedCursors.get('data'));
+      console.log(fluidSharedObjects.sharedCursors.get("data"));
       const { sharedCursors } = fluidSharedObjects;
-      const updateCursors = () =>
-        setCursors({ time: sharedCursors.get("data") });
+      const updateCursors = () => setCursors({ data: JSON.parse(sharedCursors.get('data'))});
 
-      updateLocalTimestamp();
-
-      sharedCursors.on("valueChanged", updateCursors);
+      updateCursors();
+      sharedCursors.on('valueChanged', updateCursors);
 
       return () => {
-        sharedCursors.off("valueChanged", updateCursors);
-      };
+        sharedCursors.off('valueChanged', updateCursors)
+      }
     } else {
+      return;
     }
   }, [fluidSharedObjects]);
 
-  if (cursors) {
+  const updateMousePosition = async () => {
+    if (fluidSharedObjects) {
+      const str = fluidSharedObjects.sharedCursors.get("data");
+      if (str == null) {
+        fluidSharedObjects.sharedCursors.set("data", JSON.stringify([generateString(5)]));
+      } else {
+        const data = JSON.parse(str);
+        fluidSharedObjects.sharedCursors.set("data", JSON.stringify([...data, generateString(5)]));
+      }
+    }
+  };
+
+  if(cursors) {
     return (
-      <div className="main">
+      <div className="main App">
+        <button onClick={updateMousePosition}>Click</button>
+        { cursors.data.map(c => {
+          return <h1>{c}</h1>;
+        })}
       </div>
     );
   } else {
-    return <div />;
+    <button onClick={updateMousePosition}>Click</button>
   }
+
 }
 
 export default App;
