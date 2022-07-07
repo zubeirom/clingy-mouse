@@ -73,9 +73,6 @@ function App() {
   if(cursors && cursors.data) {
     return (
       <><div className="main" onMouseMove={mouseMove}>
-        {/* {cursors.data.map((c) => {
-          return <h1>{c}</h1>;
-        })} */}
       <div id="hov" style={{ top: cursors.data[0], left: cursors.data[1]}}>clingy mouse</div> 
       </div>
       </>
