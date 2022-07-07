@@ -1,13 +1,13 @@
 /* eslint-disable no-restricted-globals */
 import React from "react";
 import { TinyliciousClient } from "@fluidframework/tinylicious-client";
-import { SharedMap, Sequence } from "fluid-framework";
+import { SharedMap } from "fluid-framework";
 import "./App.css";
 
 const getFluidData = async () => {
   // Configure Container
   const client = new TinyliciousClient();
-  const containerSchema = { initialObjects: { sharedCursors: SharedMap } };
+  const containerSchema = { initialObjects: { sharedTimestamp: SharedMap } };
 
   // Get the container from the fluid service
   let container;
@@ -23,15 +23,9 @@ const getFluidData = async () => {
   return container.initialObjects;
 };
 
-const getFakeName = async () => {
-  const res = await fetch('https://api.namefake.com');
-  const { name } = await res.json;
-  return name;
-}
-
 function App() {
   const [fluidSharedObjects, setFluidSharedObjects] = React.useState();
-  const [cursors, setCursors] = React.useState();
+  const [localTimestamp, setLocalTimestamp] = React.useState();
 
   React.useEffect(() => {
     getFluidData().then((data) => setFluidSharedObjects(data));
@@ -39,25 +33,37 @@ function App() {
 
   React.useEffect(() => {
     if (fluidSharedObjects) {
-      console.log(fluidSharedObjects.sharedCursors.get('data'));
-      const { sharedCursors } = fluidSharedObjects;
-      const updateCursors = () =>
-        setCursors({ time: sharedCursors.get("data") });
+      console.log(fluidSharedObjects);
+      const { sharedTimestamp } = fluidSharedObjects;
+      const updateLocalTimestamp = () =>
+        setLocalTimestamp({ time: sharedTimestamp.get("time") });
 
       updateLocalTimestamp();
 
-      sharedCursors.on("valueChanged", updateCursors);
+      sharedTimestamp.on("valueChanged", updateLocalTimestamp);
 
       return () => {
-        sharedCursors.off("valueChanged", updateCursors);
+        sharedTimestamp.off("valueChanged", updateLocalTimestamp);
       };
     } else {
+      return;
     }
   }, [fluidSharedObjects]);
 
-  if (cursors) {
+  if (localTimestamp) {
     return (
-      <div className="main">
+      <div className="App">
+        <button
+          onClick={() =>
+            fluidSharedObjects.sharedTimestamp.set(
+              "time",
+              Date.now().toString()
+            )
+          }
+        >
+          Get Time
+        </button>
+        <span>{localTimestamp.time}</span>
       </div>
     );
   } else {
